@@ -36124,9 +36124,7 @@ const replaceTrelloPlaceholder = (regex, body, shortCodes) => {
             );
         });
     } else {
-        throw new Error(
-            "Template string not found in your PR description '<!--TRELLO_LINK_START--><!--TRELLO_LINK_END-->'",
-        );
+        throw new Error(`Template string not found in your PR description ${regex}`);
     }
     return body;
 };
@@ -36142,6 +36140,12 @@ const run = async () => {
     const titleRE = RegExp(titleRegex);
     const commitsRE = RegExp(commitsRegex);
     const token = (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("token", { required: true });
+
+    (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.notice)(`Using replacement regex: ${replacementRegex}`);
+    (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.notice)(`Using replacement regex flags: ${replacementRegexFlags}`);
+    (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.notice)(`Using title regex: ${titleRegex}`);
+    (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.notice)(`Using commits regex: ${commitsRegex}`);
+    (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.notice)(`Using short code source: ${shortCodeSource}`);
 
     const { owner, repo } = _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.repo;
     const octokit = (0,_actions_github__WEBPACK_IMPORTED_MODULE_1__.getOctokit)(token);
