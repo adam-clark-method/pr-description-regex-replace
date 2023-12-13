@@ -36110,8 +36110,9 @@ __nccwpck_require__.r(__webpack_exports__);
 
 
 const replaceTrelloPlaceholder = (regex, body, shortCodes) => {
+    (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.notice)(`Shortcodes found ${JSON.stringify(Object.keys(shortCodes))}}`);
     const matches = body.match(regex);
-    const linkText = shortCodes
+    const linkText = Object.keys(shortCodes)
         .map((x) => {
             return `[Trello Link: ${x}](https://trello.com/c/${x})`;
         })
@@ -36182,14 +36183,14 @@ const run = async () => {
         pull_number: prNumber,
     });
 
-    const shortCodes = [];
+    const shortCodes = {};
     if (shortCodeSource === "both" || shortCodeSource === "title") {
         // get short codes from title with titleRE and match group
         const title = data.title;
         const matches = title.match(titleRE);
         try {
             const code = matches[1];
-            shortCodes.push(code);
+            shortCodes[code] = true;
         } catch {
             (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.setFailed)(
                 "Title does not contain a valid Trello short code. Please check your title regex.",
@@ -36202,28 +36203,25 @@ const run = async () => {
             repo,
             pull_number: prNumber,
         });
-        shortCodes.push(
-            ...commits.reduce((results, x) => {
-                const msg = x.commit.message;
-                const matches = msg.match(commitsRE);
-                try {
-                    const code = matches[1];
-                    if (code) {
-                        results.push(code);
-                    }
-                } catch {
-                    (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.notice)(
-                        `Commit message ${x.commit.message} does not contain a valid Trello short code. Please check your commits regex.`,
-                    );
+        commits.forEach((x) => {
+            const msg = x.commit.message;
+            const matches = msg.match(commitsRE);
+            try {
+                const code = matches[1];
+                if (code) {
+                    shortCodes[code] = true;
                 }
-                return results;
-            }, []),
-        );
+            } catch {
+                (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.notice)(
+                    `Commit message ${x.commit.message} does not contain a valid Trello short code. Please check your commits regex.`,
+                );
+            }
+        });
     }
 
     let body = data.body;
 
-    (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.notice)(`Injecting ${shortCodes.length} Trello links into PR body`);
+    (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.notice)(`Injecting ${Object.keys(shortCodes).length} Trello links into PR body`);
     try {
         body = replaceTrelloPlaceholder(replacementRE, body, shortCodes);
     } catch (err) {

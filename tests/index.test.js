@@ -72,6 +72,9 @@ describe("pull request event", () => {
                     commit: { message: " [vwxyz] fug" },
                 },
                 {
+                    commit: { message: " [vwxyz] fug" },
+                },
+                {
                     commit: { message: "dig dug" },
                 },
             ];

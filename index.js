@@ -2,8 +2,9 @@ import { getInput, notice, setFailed } from "@actions/core";
 import { context, getOctokit } from "@actions/github";
 
 export const replaceTrelloPlaceholder = (regex, body, shortCodes) => {
+    notice(`Shortcodes found ${JSON.stringify(Object.keys(shortCodes))}}`);
     const matches = body.match(regex);
-    const linkText = shortCodes
+    const linkText = Object.keys(shortCodes)
         .map((x) => {
             return `[Trello Link: ${x}](https://trello.com/c/${x})`;
         })
@@ -74,14 +75,14 @@ export const run = async () => {
         pull_number: prNumber,
     });
 
-    const shortCodes = [];
+    const shortCodes = {};
     if (shortCodeSource === "both" || shortCodeSource === "title") {
         // get short codes from title with titleRE and match group
         const title = data.title;
         const matches = title.match(titleRE);
         try {
             const code = matches[1];
-            shortCodes.push(code);
+            shortCodes[code] = true;
         } catch {
             setFailed(
                 "Title does not contain a valid Trello short code. Please check your title regex.",
@@ -94,28 +95,25 @@ export const run = async () => {
             repo,
             pull_number: prNumber,
         });
-        shortCodes.push(
-            ...commits.reduce((results, x) => {
-                const msg = x.commit.message;
-                const matches = msg.match(commitsRE);
-                try {
-                    const code = matches[1];
-                    if (code) {
-                        results.push(code);
-                    }
-                } catch {
-                    notice(
-                        `Commit message ${x.commit.message} does not contain a valid Trello short code. Please check your commits regex.`,
-                    );
+        commits.forEach((x) => {
+            const msg = x.commit.message;
+            const matches = msg.match(commitsRE);
+            try {
+                const code = matches[1];
+                if (code) {
+                    shortCodes[code] = true;
                 }
-                return results;
-            }, []),
-        );
+            } catch {
+                notice(
+                    `Commit message ${x.commit.message} does not contain a valid Trello short code. Please check your commits regex.`,
+                );
+            }
+        });
     }
 
     let body = data.body;
 
-    notice(`Injecting ${shortCodes.length} Trello links into PR body`);
+    notice(`Injecting ${Object.keys(shortCodes).length} Trello links into PR body`);
     try {
         body = replaceTrelloPlaceholder(replacementRE, body, shortCodes);
     } catch (err) {
