@@ -1,0 +1,29 @@
+name: Update PR Description adding trello links based on commit message
+author: adam clark
+description: Update content in GitHub PR description based on trello short codes in commit message.
+
+inputs:
+  token:
+    description: GitHub access token.
+    required: true
+  replacementRegex:
+    description: Regex string to match and replace with content.
+    required: false
+  replacementRegexFlags:
+    description: Regex flags to use.
+    required: false
+  titleRegex:
+    description: Regex string to match and replace with content.
+    required: false
+  commitsRegex:
+    description: Regex string to match and replace with content.
+    required: false
+  shortCodeSource:
+    description: Where to get the short codes from (commits|title|both).
+    required: false
+    default: both
+
+
+runs:
+  using: node20
+  main: dist/index.js
