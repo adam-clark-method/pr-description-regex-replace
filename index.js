@@ -16,7 +16,7 @@ export const replaceTrelloPlaceholder = (regex, body, shortCodes) => {
             );
         });
     } else {
-        throw new Error(`Template string not found in your PR description ${regex}`);
+        throw new Error(`Template string not found in your PR description '${regex}'`);
     }
     return body;
 };
@@ -95,18 +95,21 @@ export const run = async () => {
             pull_number: prNumber,
         });
         shortCodes.push(
-            ...commits.map((x) => {
+            ...commits.reduce((results, x) => {
                 const msg = x.commit.message;
                 const matches = msg.match(commitsRE);
                 try {
                     const code = matches[1];
-                    return code;
+                    if (code) {
+                        results.push(code);
+                    }
                 } catch {
                     notice(
                         `Commit message ${x.commit.message} does not contain a valid Trello short code. Please check your commits regex.`,
                     );
                 }
-            }),
+                return results;
+            }, []),
         );
     }
 

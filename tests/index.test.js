@@ -71,6 +71,9 @@ describe("pull request event", () => {
                 {
                     commit: { message: " [vwxyz] fug" },
                 },
+                {
+                    commit: { message: "dig dug" },
+                },
             ];
         });
         nock("https://api.github.com")
@@ -291,7 +294,7 @@ describe("pull request event", () => {
 
     it("should fail if it cannot find the template string", async () => {
         const errorMessage =
-            "Template string not found in your PR description '<!--TRELLO_LINK_START--><!--TRELLO_LINK_END-->'";
+            "Template string not found in your PR description '/<!--TRELLO_LINK_START-->[\\s\\S]*<!--TRELLO_LINK_END-->/gm'";
         mockPrGetReturn.mockImplementation(() => {
             return {
                 title: "[12345] PR Title",
