@@ -16,9 +16,7 @@ export const replaceTrelloPlaceholder = (regex, body, shortCodes) => {
             );
         });
     } else {
-        throw new Error(
-            "Template string not found in your PR description '<!--TRELLO_LINK_START--><!--TRELLO_LINK_END-->'",
-        );
+        throw new Error(`Template string not found in your PR description ${regex}`);
     }
     return body;
 };
@@ -34,6 +32,12 @@ export const run = async () => {
     const titleRE = RegExp(titleRegex);
     const commitsRE = RegExp(commitsRegex);
     const token = getInput("token", { required: true });
+
+    notice(`Using replacement regex: ${replacementRegex}`);
+    notice(`Using replacement regex flags: ${replacementRegexFlags}`);
+    notice(`Using title regex: ${titleRegex}`);
+    notice(`Using commits regex: ${commitsRegex}`);
+    notice(`Using short code source: ${shortCodeSource}`);
 
     const { owner, repo } = context.repo;
     const octokit = getOctokit(token);
