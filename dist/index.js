@@ -36109,41 +36109,37 @@ __nccwpck_require__.r(__webpack_exports__);
 
 
 
-const replaceTrelloPlaceholder = (regex, body, shortCodes) => {
+const replaceTrelloPlaceholder = (start, end, body, shortCodes) => {
     (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.notice)(`Shortcodes found ${JSON.stringify(Object.keys(shortCodes))}}`);
-    const matches = body.match(regex);
+    const startIndex = body.indexOf(start);
+    const endIndex = body.indexOf(end);
+    const startString = body.substring(0, startIndex + start.length);
+    const endString = body.substring(endIndex);
+    if (startIndex === -1 || endIndex === -1) {
+        throw new Error(
+            `Template start or end string not found in your PR description '${start}' or '${end}'`,
+        );
+    }
     const linkText = Object.keys(shortCodes)
         .map((x) => {
             return `[Trello Link: ${x}](https://trello.com/c/${x})`;
         })
         .join("\n");
-    if (matches) {
-        matches.forEach((match) => {
-            body = body.replace(
-                match,
-                `<!--TRELLO_LINK_START-->\n${linkText}\n<!--TRELLO_LINK_END-->`,
-            );
-        });
-    } else {
-        throw new Error(`Template string not found in your PR description '${regex}'`);
-    }
-    return body;
+    return `${startString}\n${linkText}\n${endString}`;
 };
 
 const run = async () => {
-    const defaultRegex = "<!--REPLACE_START-->[\\s\\S]*<!--REPLACE_END-->";
-    const replacementRegex = (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("replacementRegex") || defaultRegex;
-    const replacementRegexFlags = (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("replacementRegexFlags") || "gm";
+    const replacementStart = (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("replacementStart") || "<!--REPLACE_START-->";
+    const replacementEnd = (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("replacementEnd") || "<!--REPLACE_END-->";
     const titleRegex = (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("titleRegex") || "\\[(.*)\\]";
     const commitsRegex = (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("commitsRegex") || "\\[(.*)\\]";
     const shortCodeSource = (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("shortCodeSource") || "both";
-    const replacementRE = RegExp(replacementRegex, replacementRegexFlags);
     const titleRE = RegExp(titleRegex);
     const commitsRE = RegExp(commitsRegex);
     const token = (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("token", { required: true });
 
-    (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.notice)(`Using replacement regex: ${replacementRegex}`);
-    (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.notice)(`Using replacement regex flags: ${replacementRegexFlags}`);
+    (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.notice)(`Using replacement start: ${replacementStart}`);
+    (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.notice)(`Using replacement end: ${replacementEnd}`);
     (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.notice)(`Using title regex: ${titleRegex}`);
     (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.notice)(`Using commits regex: ${commitsRegex}`);
     (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.notice)(`Using short code source: ${shortCodeSource}`);
@@ -36223,7 +36219,12 @@ const run = async () => {
 
     (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.notice)(`Injecting ${Object.keys(shortCodes).length} Trello links into PR body`);
     try {
-        body = replaceTrelloPlaceholder(replacementRE, body, shortCodes);
+        body = replaceTrelloPlaceholder(
+            replacementStart,
+            replacementEnd,
+            body,
+            shortCodes,
+        );
     } catch (err) {
         (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.setFailed)(err.message);
     }

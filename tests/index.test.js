@@ -54,7 +54,7 @@ describe("pull request event", () => {
                 title: "[12345] PR Title",
                 body: `## Trello
 <!-- DO NOT TOUCH -->
-<!--TRELLO_LINK_START--><!--TRELLO_LINK_END-->`,
+<!--TRELLO_LINK_START--> <!--TRELLO_LINK_END-->`,
             };
         });
         mockCommitGetReturn.mockImplementation(() => {
@@ -297,7 +297,7 @@ describe("pull request event", () => {
 
     it("should fail if it cannot find the template string", async () => {
         const errorMessage =
-            "Template string not found in your PR description '/<!--TRELLO_LINK_START-->[\\s\\S]*<!--TRELLO_LINK_END-->/gm'";
+            "Template start or end string not found in your PR description '<!--TRELLO_LINK_START-->' or '<!--TRELLO_LINK_END-->'";
         mockPrGetReturn.mockImplementation(() => {
             return {
                 title: "[12345] PR Title",

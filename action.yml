@@ -6,11 +6,11 @@ inputs:
   token:
     description: GitHub access token.
     required: true
-  replacementRegex:
-    description: Regex string to match and replace with content.
+  replacementStart:
+    description: String to index the start of the replacement
     required: false
-  replacementRegexFlags:
-    description: Regex flags to use.
+  replacementEnd:
+    description: String to index the end of the replacement
     required: false
   titleRegex:
     description: Regex string to match and replace with content.
